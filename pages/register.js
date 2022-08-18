@@ -60,9 +60,9 @@ function RegisterForm() {
         <div className="mb-3">
           <label htmlFor="exampleInputPassword1" className="form-label">Password</label>
           <input type="password" className="form-control" id="exampleInputPassword1" required/>
-          <div class="form-check">
-        <input class="form-check-input" type="radio" name="flexRadioDefault" id="admin"/>
-        <label class="form-check-label" for="flexRadioDefault1/">
+          <div className="form-check">
+        <input className="form-check-input" type="radio" name="flexRadioDefault" id="admin"/>
+        <label className="form-check-label" htmlFor="flexRadioDefault1/">
             Admin
         </label>
         </div>
