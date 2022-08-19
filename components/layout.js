@@ -1,6 +1,6 @@
 import { Container, Navbar, Nav } from "react-bootstrap"
 import { useDispatch, useSelector } from "react-redux";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { logout } from "../slices/auth";
 function LogoutNavbar() {
   const dispatch = useDispatch();
@@ -48,11 +48,22 @@ function LoginNavbar() {
 
 export default function Layout({ children }) {
   const { isLoggedIn } = useSelector((state) => state.auth);
+  const [isLogin, setLogin] = useState(false);
+  
+
+  useEffect(()=>{
+    console.log(isLoggedIn)
+    if(isLoggedIn){
+      setLogin(true);
+    }
+    
+  },[isLoggedIn]);
 
   return(
     <div>
+     
 
-  {(isLoggedIn==false)?(
+  {(isLogin==false)?(
       <div><LoginNavbar/>
       <main>{children}</main>
       </div>

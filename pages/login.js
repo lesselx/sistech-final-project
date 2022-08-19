@@ -32,13 +32,12 @@ function LoginForm() {
           dispatch(login({ username , password }))
           .unwrap()
           .then(() => {
-            props.history.push("/hh");
-            window.location.reload();
+            alert(`berhasil login!`);
           })
           .catch(() => {
             setLoading(false);
           });
-          alert(`has been created!`);
+      
     }
     
   return (
