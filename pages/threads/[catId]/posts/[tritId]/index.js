@@ -75,17 +75,27 @@ function Posts() {
       alert("Voted Successfully")
     }})
     
-    const handleLike = (Pid) => {
+    const handleLike = (Pid, ownerId) => {
+      if(ownerId==id){
+        alert("Can't vote your own post")
+      }else{
         mutation.mutate({postId:Pid, voteType:"upvote"});    
+      }
+       
   
      
    
       }
 
-      const handleDislike = (Pid) => {
-        mutation.mutate({postId:Pid, voteType:"downvote"});    
+      const handleDislike = (Pid, ownerId) => {
+   
      
-     
+        if(ownerId==id){
+          
+          alert("Can't vote your own post")
+        }else{
+          mutation.mutate({postId:Pid, voteType:"downvote"});    
+        }
    
       }
 
@@ -96,7 +106,8 @@ function Posts() {
         deletePost(getUserData().token, pId)
     }, {onSuccess: () => {
       alert("Delete Successfully")
-      router.reload();
+  
+      
     }})
   
     
@@ -173,14 +184,14 @@ function Posts() {
                 <div key={idx}>
                     <Card>
                     {
-                    (role=="admin" && idx!==0)?
+                    (role=="admin" && !post.isStarter)?
                     (<div>
                     <Button className="position-absolute top-0 end-0" onClick={()=>handleDeletePost(post.id)} >Delete Post</Button>
                     </div>)
                     :(<div>
 
                     {
-                    (post.owner==id && idx!==0)?
+                    (post.owner==id)?
                     
                     <Post postId={post.id} token={token} content={post.content} />
                     :(<div>
@@ -193,17 +204,18 @@ function Posts() {
                     </div>)
                     }
                
-
+                    {(post.edited)?(<div>edited</div>):
+                    (<div></div>)}
                     <p>posted by {post.owner}</p>
                     <p> {post.content}</p>
                     
                     <Card.Footer>
                     <div className="py-2">
                       
-                    <Button onClick={()=>handleLike(post.id)} variant="primary">Upvote {post.upvote}</Button>
+                    <Button onClick={()=>handleLike(post.id, post.owner)} variant="primary">Upvote {post.upvote}</Button>
 
                     </div>
-                    <Button onClick={()=>handleDislike(post.id)}  variant="primary">Downvote {post.downvote}</Button>
+                    <Button onClick={()=>handleDislike(post.id, post.owner)}  variant="primary">Downvote {post.downvote}</Button>
                 
                     <CreatePost token={token} trId={tritId} repId={post.owner}/>
                  
@@ -236,7 +248,17 @@ function Posts() {
                     <p> {post.content}</p>
                     
             
+                    <Card.Footer>
+                    <div className="py-2">
+                      
+                    <Button variant="primary">Upvote {post.upvote}</Button>
 
+                    </div>
+                    <Button variant="primary">Downvote {post.downvote}</Button>
+                
+                    <CreatePost token={token} trId={tritId} repId={post.owner}/>
+                 
+                    </Card.Footer>
                
 
             
@@ -263,8 +285,6 @@ function Thread({name, tritId, token}) {
     const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-  const { user } = useSelector((state) => state.auth);
-  console.log(tritId)
   const mutation = useMutation(formData => {
       editThread(formData, token, tritId)
   })
@@ -318,7 +338,8 @@ function Thread({name, tritId, token}) {
 }
 
 function Post({postId, token, content}) {
-    const [show, setShow] = useState(false);
+  const router = useRouter();
+  const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const mutation = useMutation(formData => {

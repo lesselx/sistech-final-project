@@ -16,7 +16,7 @@ const login = async (username, password) => {
     }, config);
 
   if (response.data) {
-    setCookie('user', JSON.stringify(response.data), {maxAge:900})
+    setCookie('user', JSON.stringify(response.data))
     console.log(response)
   }else{
     console.log(response)
