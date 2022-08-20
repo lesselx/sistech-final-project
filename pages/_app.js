@@ -1,7 +1,7 @@
 
 import 'bootstrap/dist/css/bootstrap.css';
 import { ReactQueryDevtools } from 'react-query/devtools'
-
+import '../styles/globals.css'
 import { QueryClient, QueryClientProvider } from 'react-query';
 import store from '../store';
 import { Provider } from 'react-redux';

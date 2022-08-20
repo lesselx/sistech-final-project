@@ -1,6 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { setMessage } from "./message";
 import authServices from "../services/authServices";
+import { getCookie } from "cookies-next";
+
+const user = getCookie('user');
 
 export const register = createAsyncThunk(
   "auth/register",
@@ -46,8 +49,8 @@ export const logout = createAsyncThunk("auth/logout", async () => {
     authServices.logout();
   });
 
-  const initialState = isUser()==true
-    ? { isLoggedIn: true, user: getUser(), message:"" }
+  const initialState = getCookie('user')
+    ? { isLoggedIn: true, user: getCookie('user'), message:"" }
     : { isLoggedIn: false, user: null, message:"" };
   const authSlice = createSlice({
     name: "auth",
@@ -78,21 +81,5 @@ export const logout = createAsyncThunk("auth/logout", async () => {
   export default reducer;
 
 
-  function isUser(){
-    if (typeof window !== 'undefined') {
-      if(localStorage.getItem('user')){
-        return true;
-      }else{
-        return false;
-      }
-    }
 
-    
-  }
-
-  function getUser(){
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('user');
-    }
-   
-  }
+ 

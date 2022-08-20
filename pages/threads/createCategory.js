@@ -1,7 +1,8 @@
-import React, { useState, useEffect  } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 import { useMutation } from "react-query";
 import axios from 'axios'
+import { useRouter } from "next/router";
 
 function postCategory(formData, token){
  
@@ -12,38 +13,48 @@ function postCategory(formData, token){
 }
 function CreateCategory() {  
     const { user } = useSelector((state) => state.auth);
-    const mutation = useMutation(formData => {
-        postCategory(formData, JSON.parse(user).token)
-    })
-   
+    const router = useRouter();
 
+    function getToken(){
+      try {
+        JSON.parse(user);
+      } catch (e) {
+        return user;
+    }
+    return JSON.parse(user);
+
+    }
+
+  
+    const mutation = useMutation(formData => {
+        postCategory(formData, getToken().token)
+    }, { onSuccess: () => {
+
+      alert("Succesfully Added");
+      router.push('/')
+      
+
+
+      
+    }} )
    
 
     const handleSubmit = async (event) => {
       event.preventDefault();
           const name = event.target[0].value;
           mutation.mutate({name: name})
+        
           };
     
     
   return (
     
     <div className='login'>
+
+
+
         
-        {mutation.isLoading ? (
-        'Adding todo...'
-      ) : (
-        <>
-          {mutation.isError ? (
-            <div>An error occurred: {mutation.error.message}</div>
-          ) : null}
-
-          
-
-           
-        </>
-      )}
-
+     
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <label htmlFor="exampleLabelCategory" className="form-label">Nama Kategori</label>

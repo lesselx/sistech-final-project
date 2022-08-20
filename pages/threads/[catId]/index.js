@@ -5,7 +5,7 @@ import { useQuery } from 'react-query';
 import Link from "next/link";
 import axios from 'axios'
 import { useMutation } from "react-query";
-import {Button, Form, Modal} from "react-bootstrap";
+import {Button, ListGroup} from "react-bootstrap";
 async function fetchThreads(id){
     
       const config = {headers: {Authorization: "Bearer 62fca9b9010b337ecc272d52"}}
@@ -37,32 +37,30 @@ function Threads() {
 
     const mutation = useMutation((id) => {
         deleteThread(JSON.parse(user).token, id)
-    })
+    }, { onSuccess: () => {
+      alert("Deleted succesfully")
+        router.reload();
+    } })
     const handleDelete = (id) => {
         mutation.mutate(id);    
-        Router.reload();
-     
-   
+  
+    
       }
+    
+  function getToken(){
+    try {
+      JSON.parse(user);
+    } catch (e) {
+      return user;
+  }
+  return JSON.parse(user);
 
-      function isJsonString(str) {
-        try {
-            JSON.parse(str);
-        } catch (e) {
-            return false;
-        }
-        return true;
-    }
+  }
   
     
     useEffect(() => {
       if(isLoggedIn){
-       if(isJsonString(user)){
-        setRole(JSON.parse(user).role);
-       }else{
-        setRole(user.role)
-       
-       }
+      setRole(getToken().role)
   
       }
      
@@ -83,13 +81,13 @@ function Threads() {
       
      
 
-<div className='threads'> 
-     
+<div className='container'> 
+<h1>List Threads</h1>
       {(isLoggedIn)?
       (<div>
-      <div >
-      <button type="button" className="btn btn-secondary"><Link href={`/threads/${catId}/createThread`}>Add Thread</Link></button>
-      <h1>List Threads</h1>
+      <div className="pb-2">
+      <Button variant="success"><Link href={`/threads/${catId}/createThread`}>Add Thread</Link></Button>
+     
       </div>
       
       {(role=="admin")?
@@ -97,10 +95,25 @@ function Threads() {
 
         {
           data.data?.map((tr)=>{
-              return (<div key={tr.id}>
+              return (<div className="pb-2" key={tr.id}>
                 <button onClick={()=>handleDelete(tr.id)} type="button" className="btn btn-secondary">Delete Thread</button>
      
-                <Link href={'/threads/' + catId+'/posts/'+tr.id}>{tr.name}</Link>
+                <ListGroup as="ol" numbered >
+                  <div className="cat">
+                
+                  <ListGroup.Item variant="success"
+                    as="li"
+                    className="d-flex justify-content-between align-items-start" >
+                    <div className="ms-2 me-auto">
+                  
+                    <Link href={'/threads/' + catId+'/posts/'+tr.id}>{tr.name}</Link>
+                    
+                    </div>
+                   
+                  </ListGroup.Item>
+          
+                  </div>
+                </ListGroup>
                     </div>
               )
           })
@@ -114,10 +127,23 @@ function Threads() {
           (data.data)?.map((thread)=>{
         
              return (
-                 <div key={thread.id}>
-        
+              
+              <ListGroup as="ol" numbered>
+              <div className="cat">
+            
+              <ListGroup.Item
+                as="li"
+                className="d-flex justify-content-between align-items-start" >
+                <div className="ms-2 me-auto">
+                
                 <Link href={'/threads/' + catId+'/posts/'+thread.id}>{thread.name}</Link>
+                
                 </div>
+               
+              </ListGroup.Item>
+      
+              </div>
+            </ListGroup>
               )
           
           })
@@ -131,11 +157,32 @@ function Threads() {
       (<div>
 
         {
-          (data.data)?.map((thread)=>{
+          (data.data)?.map((thread  )=>{
         
              return (
-                 <div key={thread.id}>
-                <Link href={'/threads/' + catId+'/posts/'+thread.id}>{thread.name}</Link>
+                 <div className="pb-2 " key={thread.id}>
+
+
+                <ListGroup  as="ol" numbered>
+                  <div className="cat">
+                
+                  <ListGroup.Item variant="success"
+                    as="li"
+                    className="d-flex justify-content-between align-items-start" >
+                    <div className="ms-2 me-auto">
+                 
+                    <Link href={'/threads/' + catId+'/posts/'+thread.id}>{thread.name}</Link>
+
+                    </div>
+                   
+                  </ListGroup.Item>
+          
+                  </div>
+                </ListGroup>
+
+
+        
+               
                 </div>
               )
           

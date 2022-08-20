@@ -1,12 +1,13 @@
-import styles from '../styles/Home.module.css'
-import {Button, Form, Modal} from "react-bootstrap";
+
+import {Button, Form, Modal, ListGroup} from "react-bootstrap";
 import { useQuery } from 'react-query';
 import axios from 'axios'
 import {useSelector } from "react-redux";
 import Link from "next/link";
 import { useEffect, useState } from 'react';
 import { useMutation } from "react-query";
-import Router from 'next/router'
+import { useRouter } from "next/router";
+
 async function fetchCategory(){
   if (typeof window !== 'undefined') {
     const config = {headers: {Authorization: "Bearer 62fca9b9010b337ecc272d52"}}
@@ -17,9 +18,6 @@ async function fetchCategory(){
   }
 
 
-
-    
- 
 }
 
 function editCategory(formData, token, id){
@@ -44,44 +42,40 @@ export default function Home( ){
   const { user } = useSelector((state) => state.auth);
   const { isLoggedIn } = useSelector((state) => state.auth);
   const [role, setRole] = useState('');
+  const router = useRouter();
+
   const mutation = useMutation((id) => {
-    deleteCategory(JSON.parse(user).token, id)
-})
+    deleteCategory(getToken().token, id)
+}, { onSuccess: () => {
+  alert("Deleted succesfully")
+    router.reload();
+}} )
 
   const handleDelete = (id) => {
     mutation.mutate(id);
-    Router.reload();
+  }
+
+  
+  function getToken(){
+    try {
+      JSON.parse(user);
+    } catch (e) {
+      return user;
+  }
+  return JSON.parse(user);
+
   }
 
 
-
-  function isJsonString(str) {
-      try {
-          JSON.parse(str);
-      } catch (e) {
-          return false;
-      }
-      return true;
-  }
 
   
   useEffect(() => {
     if(isLoggedIn){
-     if(isJsonString(user)){
-      setRole(JSON.parse(user).role);
-     }else{
-      setRole(user.role)
-     
-     }
-
-    }
-   
-    
+      setRole(getToken().role)
+    }  
   });
 
 
-
-  
 
   if(isLoading){
       return <div>Loading ...</div>
@@ -93,23 +87,41 @@ export default function Home( ){
 
   return(
       <div className='container'> 
-      <h1></h1>
-
+      <h1>List Category</h1>
       {(role=="admin")?
       (<div>
-      <div >
-      <button type="button" className="btn btn-secondary"><Link href={'threads/createCategory'}>Add Category</Link></button>
-      <h1>List Category</h1>
-      </div>
+        <div  className="pb-4">
+
+        <Button className="border border-5 rounded-start" variant="dark" ><Link href={'threads/createCategory'}>Add Category</Link></Button>
+        </div>
+    
+
+
+    
 
       {
           data.map((cat)=>{
-              return (<div key={cat.id}>
-                <button onClick={()=>handleDelete(cat.id)} type="button" className="btn btn-secondary">Delete Category</button>
-                <Category{...cat}/>
-             
+              return (
+              <div key={cat.id}>
+              
+                <Category token={getToken().token} {...cat}/>
 
-                <li><Link href={'threads/' + cat.id}>{cat.name}</Link> </li>
+                 <ListGroup as="ol" numbered>
+                  <div className="cat">
+                
+                  <ListGroup.Item
+                    as="li"
+                    className="d-flex justify-content-between align-items-start" >
+                    <div className="ms-2 me-auto">
+   
+                    <Link href={'threads/' + cat.id}>{cat.name}</Link> 
+                    <Button className="position-absolute top-0 end-0" onClick={()=>handleDelete(cat.id)}  variant="primary" >Delete Category</Button>
+                    </div>
+                   
+                  </ListGroup.Item>
+          
+                  </div>
+                </ListGroup>
                     </div>
               )
           })
@@ -120,8 +132,23 @@ export default function Home( ){
 
       {
           data.map((cat)=>{
-              return <li key={cat.id}>
-                 <Link href={'threads/' + cat.id}>{cat.name}</Link> </li>
+              return (<div key={cat.id}>
+                  <ListGroup as="ol" numbered>
+                  <div className="cat">
+                
+                  <ListGroup.Item
+                    as="li"
+                    className="d-flex justify-content-between align-items-start" >
+                    <div className="ms-2 me-auto">
+                    
+                    <Link href={'threads/' + cat.id}>{cat.name}</Link> 
+                    </div>
+                   
+                  </ListGroup.Item>
+          
+                  </div>
+                </ListGroup>
+                </div>)
           })
       }
       </div>)
@@ -133,14 +160,14 @@ export default function Home( ){
   )
 }
 
-function Category({name, id}) {
+function Category({name, id, token}) {
     const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const { user } = useSelector((state) => state.auth);
   const mutation = useMutation(formData => {
-      editCategory(formData, JSON.parse(user).token, id)
+      editCategory(formData, token, id)
   })
  
 
@@ -150,25 +177,12 @@ function Category({name, id}) {
     event.preventDefault();
         const name = event.target[0].value;
         mutation.mutate({name: name})
-        Router.reload();
         };
   
   return (
     <div>
 
-    {mutation.isLoading ? (
-        'Adding todo...'
-      ) : (
-        <>
-          {mutation.isError ? (
-            <div>An error occurred: {mutation.error.message}</div>
-          ) : null}
 
-          
-
-           
-        </>
-      )}
         <Button variant="primary" onClick={handleShow}>
                   Edit Category
                 </Button>

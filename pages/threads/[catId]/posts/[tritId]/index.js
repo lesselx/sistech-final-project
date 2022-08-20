@@ -25,8 +25,6 @@ function deletePost(token, id){
 
 function editThread(formData, token, id){
  
-    console.log(token)
-    console.log(id)
     const config = {headers: {Authorization: "Bearer 62fca9b9010b337ecc272d52", "X-USER-TOKEN":token}}
   
     return axios.put('https://avatar.ristek.cs.ui.ac.id/thread/'+id, formData, config )  
@@ -72,60 +70,67 @@ function Posts() {
 
     
     const mutation = useMutation(formData => {
-        sendVote(formData, JSON.parse(user).token)
-    })
+        sendVote(formData, getUserData().token)
+    }, {onSuccess: () => {
+      alert("Voted Successfully")
+    }})
     
     const handleLike = (Pid) => {
         mutation.mutate({postId:Pid, voteType:"upvote"});    
-        // Router.reload();
+  
      
    
       }
 
       const handleDislike = (Pid) => {
         mutation.mutate({postId:Pid, voteType:"downvote"});    
-        // Router.reload();
+     
      
    
       }
 
 
 
-   
-
 
     const deleteMutation = useMutation((pId) => {
-        deletePost(JSON.parse(user).token, pId)
-    })
+        deletePost(getUserData().token, pId)
+    }, {onSuccess: () => {
+      alert("Delete Successfully")
+      router.reload();
+    }})
   
     
 
     const handleDeletePost = (id) => {
         deleteMutation.mutate(id);    
-        // Router.reload();
-     
-   
+ 
+
       }
 
-    function isJsonString(str) {
-        try {
-            JSON.parse(str);
-        } catch (e) {
-            return false;
-        }
-        return true;
+
+    function getUserData(){
+      try {
+        JSON.parse(user);
+      } catch (e) {
+        return user;
+    }
+    return JSON.parse(user);
+  
     }
 
+    
+
     useEffect(() => {
-        if(isJsonString(user)){
-            setId((jwtDecode(JSON.parse(user).token)).iss);
-            setRole(JSON.parse(user).role);
-            setToken(JSON.parse(user).token);
-        }else{
-            setId((jwtDecode(user.token)).iss);
-            setRole(user.role);
-            setToken(user.token);
-        }
+      if(isLoggedIn){
+        setId(jwtDecode(getUserData().token).iss);
+            setRole(getUserData().role);
+            setToken(getUserData().token);
+
+      }
+            
+            
+   
+        
     
       });
 
@@ -143,6 +148,8 @@ function Posts() {
     return (
       
       <div className='posts'>
+<h1> {posts.name}</h1>
+      
         {(isLoggedIn)?
         (<div>
         
@@ -157,20 +164,24 @@ function Posts() {
 
         }
 
+  
             { 
                 posts.data?.map((post, idx)=>{
                     return (
+
+                      
                 <div key={idx}>
-                    
+                    <Card>
                     {
                     (role=="admin" && idx!==0)?
                     (<div>
-                    <button onClick={()=>handleDeletePost(post.id)} type="button" className="btn btn-primary">Delete Post</button>
+                    <Button className="position-absolute top-0 end-0" onClick={()=>handleDeletePost(post.id)} >Delete Post</Button>
                     </div>)
                     :(<div>
 
                     {
                     (post.owner==id && idx!==0)?
+                    
                     <Post postId={post.id} token={token} content={post.content} />
                     :(<div>
 
@@ -181,22 +192,29 @@ function Posts() {
 
                     </div>)
                     }
-                    <Card body>
+               
 
-                    <p>{post.owner}</p>
+                    <p>posted by {post.owner}</p>
                     <p> {post.content}</p>
                     
                     <Card.Footer>
+                    <div className="py-2">
+                      
                     <Button onClick={()=>handleLike(post.id)} variant="primary">Upvote {post.upvote}</Button>
+
+                    </div>
                     <Button onClick={()=>handleDislike(post.id)}  variant="primary">Downvote {post.downvote}</Button>
+                
+                    <CreatePost token={token} trId={tritId} repId={post.owner}/>
+                 
                     </Card.Footer>
             
 
+               
+
+               
+
                     </Card>
-
-                    <CreatePost token={token} trId={tritId} repId={post.owner}/>
-
-                  
                 
                 </div>)
           
@@ -212,8 +230,18 @@ function Posts() {
                 posts.data?.map((post, idx)=>{
               return (<div key={idx}>
 
-                posted by {post.owner}
-                <p> {post.content}</p>
+<Card>
+                 
+                    <p>posted by {post.owner}</p>
+                    <p> {post.content}</p>
+                    
+            
+
+               
+
+            
+
+                    </Card>
                
               </div>)
           
@@ -247,7 +275,6 @@ function Thread({name, tritId, token}) {
   const handleSubmit = async (event) => {
     event.preventDefault();
         const nama = event.target[0].value;
-        console.log(nama)
         mutation.mutate({name: nama})
        
         };
@@ -255,19 +282,6 @@ function Thread({name, tritId, token}) {
   return (
     <div>
 
-    {mutation.isLoading ? (
-        'Editing todo...'
-      ) : (
-        <>
-          {mutation.isError ? (
-            <div>An error occurred: {mutation.error.message}</div>
-          ) : null}
-
-          
-
-           
-        </>
-      )}
         <Button variant="primary" onClick={handleShow}>
                   Edit Thread
                 </Button>
@@ -307,7 +321,6 @@ function Post({postId, token, content}) {
     const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-  const { user } = useSelector((state) => state.auth);
   const mutation = useMutation(formData => {
       editPost(formData, token, postId)
   })
@@ -319,7 +332,7 @@ function Post({postId, token, content}) {
     event.preventDefault();
         const content = event.target[0].value;
         mutation.mutate({content: content})
-        // Router.reload();
+   
         };
   
   return (
@@ -367,7 +380,10 @@ function Post({postId, token, content}) {
   const { user } = useSelector((state) => state.auth);
   const mutation = useMutation(formData => {
       createPost(formData, token)
-  })
+  }, {onSuccess: () => {
+    alert("Replied Successfully")
+    router.reload();
+  }})
  
 
  
@@ -376,15 +392,15 @@ function Post({postId, token, content}) {
     event.preventDefault();
         const content = event.target[0].value;
         mutation.mutate({content: content, threadId:trId, replyId: repId})
-        // Router.reload();
+      
         };
   
   return (
     <div>
-
-        <Button variant="primary" onClick={handleShow}>
+<div className="py-2"><Button variant="primary" onClick={handleShow}>
                   Reply Post
-                </Button>
+                </Button></div>
+        
 
                 <Modal show={show} onHide={handleClose}>
                     <Modal.Header closeButton>
@@ -400,7 +416,7 @@ function Post({postId, token, content}) {
                         </Form.Group> 
                   
                         <Button variant="primary" type='submit'>
-                        Button
+                        Reply
                       </Button>
                       </Form>
                     </Modal.Body>

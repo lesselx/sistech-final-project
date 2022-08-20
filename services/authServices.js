@@ -1,7 +1,7 @@
 import axios from "axios";
 const API_URL = "https://avatar.ristek.cs.ui.ac.id/auth/";
 const config = { headers: {Authorization: 'Bearer 62fca9b9010b337ecc272d52'} }
-
+import { setCookie, deleteCookie } from 'cookies-next'
 const register = (username, role, password) => {
   return axios.post(API_URL + "register", {
     username,
@@ -16,7 +16,7 @@ const login = async (username, password) => {
     }, config);
 
   if (response.data) {
-    localStorage.setItem("user", JSON.stringify(response.data));
+    setCookie('user', JSON.stringify(response.data), {maxAge:900})
     console.log(response)
   }else{
     console.log(response)
@@ -25,7 +25,7 @@ const login = async (username, password) => {
   return response.data;
 };
 const logout = () => {
-  localStorage.removeItem("user");
+  deleteCookie('user');
 };
 const authServices = {
   register,

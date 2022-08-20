@@ -1,4 +1,4 @@
-import React, { useState, useEffect  } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import {useRouter} from "next/router";
 import { useMutation } from "react-query";
@@ -12,27 +12,27 @@ function postThread(formData, token){
 
 }
 function CreateThread() {  
-    const { isLoggedIn } = useSelector((state) => state.auth);
-    const [role, setRole] = useState('');
     const router = useRouter();
     const {catId}=router.query;
     
     const { user } = useSelector((state) => state.auth);
     const mutation = useMutation(formData => {
-        postThread(formData, JSON.parse(user).token)
-    })
+        postThread(formData, getToken().token)
+    }, {onSuccess: () => {
+      alert("Thread Posted Succesfully")
+        router.push(`/threads/${catId}`)
+    }})
 
+    
+  function getToken(){
+    try {
+      JSON.parse(user);
+    } catch (e) {
+      return user;
+  }
+  return JSON.parse(user);
 
-    if(mutation.isSuccess){
-        console.log("hello");
-        console.log(catId);
-        if(router.isReady){
-            router.push(`/threads/${catId}`)
-        }
-     
-    }
-   
-
+  }
    
 
     const handleSubmit = async (event) => {
@@ -48,16 +48,10 @@ function CreateThread() {
     <div className='login'>
         
         {mutation.isLoading ? (
-        'Adding todo...'
+        'Sending data ...'
       ) : (
         <>
-          {mutation.isError ? (
-            <div>An error occurred: {mutation.error.message}</div>
-          ) : null}
-
-          
-
-           
+       
         </>
       )}
 
@@ -68,7 +62,7 @@ function CreateThread() {
         </div>
         <div className="mb-3">
           <label htmlFor="exampleLabelCategory" className="form-label">Content</label>
-          <input type="text" className="form-control" id="exampleInputCategory" required/>
+          <input type="textarea" className="form-control" id="exampleInputCategory" required/>
         </div>
       
         <button type="submit" className="btn btn-primary">Submit</button>
