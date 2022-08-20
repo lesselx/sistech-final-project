@@ -7,6 +7,16 @@ import Link from "next/link";
 import { useEffect, useState } from 'react';
 import { useMutation } from "react-query";
 import { useRouter } from "next/router";
+export async function getServerSideProps() {
+  // Fetch data from external API
+  const config = {headers: {Authorization: "Bearer 62fca9b9010b337ecc272d52"}}
+  const res = await fetch(`https://avatar.ristek.cs.ui.ac.id/category/`, config)
+  const cats = await res.json()
+  console.log(cats);
+
+  // Pass data to the page via props
+  return { props: { cats } }
+}
 
 async function fetchCategory(){
   if (typeof window !== 'undefined') {
@@ -36,9 +46,9 @@ function deleteCategory(token, id){
 
 }
 
-export default function Home( ){
+export default function Home( {cats} ){
 
-  const {data, error, isError, isLoading} = useQuery('listCats', fetchCategory);
+  const {data, error, isError, isLoading} = useQuery('listCats', fetchCategory, {initialData: cats});
   const { user } = useSelector((state) => state.auth);
   const { isLoggedIn } = useSelector((state) => state.auth);
   const [role, setRole] = useState('');
