@@ -127,6 +127,7 @@ function Threads() {
           (data.data)?.map((thread)=>{
         
              return (
+               <div key={thread.id}>
               
               <ListGroup as="ol" numbered>
               <div className="cat">
@@ -144,7 +145,10 @@ function Threads() {
       
               </div>
             </ListGroup>
+                </div>
+
               )
+          
           
           })
         }
