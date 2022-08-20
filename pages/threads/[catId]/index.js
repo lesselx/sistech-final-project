@@ -6,6 +6,19 @@ import Link from "next/link";
 import axios from 'axios'
 import { useMutation } from "react-query";
 import {Button, ListGroup} from "react-bootstrap";
+
+export async function getServerSideProps(context) {
+
+  if(context.query){
+
+    const catId = context.query.id
+    const result = await fetchThreads(catId)
+  
+    return { props: { result } }
+
+  }
+
+}
 async function fetchThreads(id){
     
       const config = {headers: {Authorization: "Bearer 62fca9b9010b337ecc272d52"}}
@@ -23,14 +36,14 @@ function deleteThread(token, id){
       
       }
   
-function Threads() {
+function Threads({threads}) {
 
 
     const router = useRouter();
     const { isLoggedIn } = useSelector((state) => state.auth);
     const { user } = useSelector((state) => state.auth);
     const {catId}=router.query;
-    const {data, error, isError, isLoading} = useQuery('listThreads', ()=> fetchThreads(catId));
+    const {data, error, isError, isLoading} = useQuery('listThreads', ()=> fetchThreads(catId), {initialData: threads});
     const [role, setRole] = useState('');
 
   
