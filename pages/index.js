@@ -7,12 +7,15 @@ import Link from "next/link";
 import { useEffect, useState } from 'react';
 import { useMutation } from "react-query";
 import { useRouter } from "next/router";
-export async function getServerSideProps() {
+export async function getServerSideProps({req, res}) {
   // Fetch data from external API
+  res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=10, stale-while-revalidate=59'
+  )
   const config = {headers: {Authorization: "Bearer 62fca9b9010b337ecc272d52"}}
-  const res = await fetch(`https://avatar.ristek.cs.ui.ac.id/category/`, config)
-  const cats = await res.json()
-  console.log(cats);
+  const result = await fetch(`https://avatar.ristek.cs.ui.ac.id/category/`, config)
+  const cats = await result.json()
 
   // Pass data to the page via props
   return { props: { cats } }
